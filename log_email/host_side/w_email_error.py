@@ -25,7 +25,7 @@ channel.queue_bind(exchange='logs', queue=queue_name)
 def callback(ch, method, properties, body):
     log_data = json.loads(body)
 
-    if log_data['type'] == 'error':
+    if log_data['type'] == '[Error]':
         print("[!] Error log detected, sending email ...")
         email_body = f"""
         Un error se ha detectado en el portal en el tiempo {log_data['date_time']}, el mensaje es: \n
@@ -39,4 +39,9 @@ def callback(ch, method, properties, body):
 
 channel.basic_consume(callback, queue=queue_name, no_ack=True)
 
-channel.start_consuming()
+try:
+    channel.start_consuming()
+except KeyboardInterrupt:
+    pass
+finally:
+    connect.close()

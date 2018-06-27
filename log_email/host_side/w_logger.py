@@ -24,12 +24,17 @@ print(f"[*] Starting worker logger with queue {queue_name}")
 def callback(ch, method, properties, body):
     log_data = json.loads(body)
     print(f"[*] Save {log_data['type']} log")
-    string = f"[{log_data['type']}]:{log_data['date_time']}:{log_data['message']}\n"
+    string = f"{log_data['type']}:{log_data['date_time']}:{log_data['message']}\n"
     with open('logs.log', 'a') as f:
         f.write(string)
 
 
 channel.basic_consume(callback, queue=queue_name, no_ack=True)
 
-channel.start_consuming()
+try:
+    channel.start_consuming()
+except KeyboardInterrupt:
+    pass
+finally:
+    connect.close()
 

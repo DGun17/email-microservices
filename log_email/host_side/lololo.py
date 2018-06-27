@@ -12,13 +12,6 @@ with open('credentials', 'r') as f:
     G_EMAIL = data[0]
     PASSWORD = data[1]
 
-# Configure SMTP
-G_MAIL = smtplib.SMTP('smtp.gmail.com', 587)
-# # Init TLS
-G_MAIL.ehlo()
-G_MAIL.starttls()
-G_MAIL.set_debuglevel(1)
-
 
 def send(subject: str,  send_list: list, body: str, from_email: str = None) -> bool:
     """
@@ -39,6 +32,13 @@ def send(subject: str,  send_list: list, body: str, from_email: str = None) -> b
         assert len(info) == 2, "Email incorrect verify list"
         add = Address(display_name=email['name'], username=info[0], domain=info[1])
         destinations.append(add)
+
+    # Configure SMTP
+    G_MAIL = smtplib.SMTP('smtp.gmail.com', 587)
+    # # Init TLS
+    G_MAIL.ehlo()
+    G_MAIL.starttls()
+    G_MAIL.set_debuglevel(1)
 
     # Login account
     G_MAIL.login(G_EMAIL, PASSWORD)
