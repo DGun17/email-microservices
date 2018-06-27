@@ -17,12 +17,12 @@ def run():
 
     channel = connection.channel()  # Make a communication channel
 
-    channel.exchange_declare(exchange='logs', exchange_type='fanout')
+    channel.exchange_declare(exchange='logs', exchange_type='direct')
 
     message = get_info()
 
     channel.basic_publish(exchange='logs',
-                          routing_key='',
+                          routing_key=message['type'],
                           body=json.dumps(message)
                           )
 

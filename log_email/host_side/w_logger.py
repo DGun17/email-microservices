@@ -9,14 +9,17 @@ channel = connect.channel()
 
 channel.exchange_declare(
     exchange='logs',
-    exchange_type='fanout',
+    exchange_type='direct',
 )
 
 queue = channel.queue_declare(exclusive=True)
 
 queue_name = queue.method.queue
 
-channel.queue_bind(exchange='logs', queue=queue_name)
+channel.queue_bind(exchange='logs', queue=queue_name, routing_key="[Debug]")
+channel.queue_bind(exchange='logs', queue=queue_name, routing_key="[Info]")
+channel.queue_bind(exchange='logs', queue=queue_name, routing_key="[Warning]")
+channel.queue_bind(exchange='logs', queue=queue_name, routing_key="[Error]")
 
 print(f"[*] Starting worker logger with queue {queue_name}")
 
