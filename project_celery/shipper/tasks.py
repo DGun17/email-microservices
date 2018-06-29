@@ -43,19 +43,9 @@ def shipper_lastest(file_id):
         try:
             user_info = pandas.read_excel(file_path, names=columns)
             for _, row in user_info.iterrows():
-                # print(f"[+] Save user #{index+1} with username {row['username']}")
-                User(password='',
-                     last_login=row['last_login'],
-                     is_superuser=row['is_superuser'],
-                     first_name=row['first_name'],
-                     last_name=row['last_name'],
-                     email=row['email'],
-                     is_staff=row['is_staff'],
-                     is_active=row['is_active'],
-                     date_joined=row['date_joined'],
-                     username=row['username']
-                     ).save()
-
+                kwargs = dict(row)
+                kwargs.pop('id', None)
+                User(**kwargs).save()
         except Exception as e:
 
             print(f"[-] Error file to register user wrong, {e}")
