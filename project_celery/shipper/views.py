@@ -1,6 +1,8 @@
 from django.core.urlresolvers import reverse_lazy
-from django.views.generic import FormView, CreateView
+from django.views.generic import FormView
 from shipper.forms import ReportUpload
+from shipper.tasks import send_repo_file, get_users, clean_directory
+from django.shortcuts import render, redirect
 # Create your views here.
 
 
@@ -18,3 +20,12 @@ class UploadReport(FormView):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+
+
+def send_report(request):
+    if request.method == 'POST':
+        result = (get_users.s() | send_repo_file.s() | clean_directory.s())()
+        return redirect('shipper:send_report')
+    else:
+        return render(request, 'shipper/report.html')
+
