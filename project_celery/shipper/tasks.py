@@ -1,11 +1,15 @@
 from __future__ import absolute_import
 import os
 import pandas
+import xlsxwriter
+import xlrd
+import mimetypes
 from os.path import splitext
 from django.conf import settings
 from celery import current_app
 from shipper.models import Report
 from django.contrib.auth import get_user_model
+from django.core.mail import EmailMessage
 
 app = current_app
 
@@ -20,9 +24,17 @@ def test_shipper():
         print(f"[+] file: {file}")
 
 
-columns = ["id", "last_login", "is_superuser", "username",
-           "first_name", "last_name", "email", "is_staff",
-           "is_active", "date_joined"]
+columns = ["id",
+           "password",
+           "last_login",
+           "is_superuser",
+           "username",
+           "first_name",
+           "last_name",
+           "email",
+           "is_staff",
+           "is_active"
+           ]
 
 User = get_user_model()
 
@@ -51,5 +63,41 @@ def shipper_lastest(file_id):
             print(f"[-] Error file to register user wrong, {e}")
 
 
+@app.task()
+def get_users():
+    backup_path = os.path.join(settings.REPORTS_DIR_FILES, 'send')
+    filepath = os.path.join(backup_path, 'user_actives.xlsx')
 
+    # Make headers
+    workbook = xlsxwriter.Workbook(filepath, {'remove_timezone': True})
+    worksheet = workbook.add_worksheet(name='users')
+    # Add header
+    worksheet.write_row(row=0, col=0, data=columns)
+
+    # Make query
+    users = User.objects.filter(is_active=1)
+
+    for idx, user in enumerate(users):
+        u = user.__dict__
+        u.pop('_password', None)
+        u.pop('_state', None)
+        u.pop('date_joined', None)
+
+        worksheet.write_row(row=idx+2,
+                            col=0,
+                            data=u.values()
+                            )
+    workbook.close()
+    return filepath
+
+
+@app.task()
+def send_repo_file(file):
+    e = EmailMessage()
+    e.subject = "Usuarios activos en la plataforma"
+    e.to = ["<send_to>  "]
+    e.from_email = settings.EMAIL_HOST_USER.strip()
+    e.attach_file(file)
+    e.send()
+    return True
 
