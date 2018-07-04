@@ -25,6 +25,7 @@ class UploadReport(FormView):
 def send_report(request):
     if request.method == 'POST':
         result = (get_users.s() | send_repo_file.s() | clean_directory.s())()
+        print(result)
         return redirect('shipper:send_report')
     else:
         return render(request, 'shipper/report.html')

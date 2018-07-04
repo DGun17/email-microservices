@@ -2,8 +2,6 @@ from __future__ import absolute_import
 import os
 import pandas
 import xlsxwriter
-import xlrd
-import mimetypes
 from os.path import splitext
 from django.conf import settings
 from celery import current_app
